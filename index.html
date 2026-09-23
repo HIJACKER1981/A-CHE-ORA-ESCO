@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Timer - Calcolo Orario Uscita</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .days-selector {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .day-btn {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 10px 0;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .day-btn:hover {
+            border-color: var(--accent);
+            color: var(--text-main);
+        }
+
+        .day-btn.active {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        input {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-now {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background-color 0.2s;
+        }
+
+        .btn-now:hover {
+            background-color: var(--border);
+        }
+
+        .result-card {
+            margin-top: 24px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .result-time {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 12px;
+        }
+
+        .countdown-container {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+
+        .countdown-time {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: var(--border);
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<!-- Configurazioni specifiche per iOS (Web App) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Work Timer">
+    <link rel="apple-touch-icon" href="icon.png">
+<body>
+
+    <div class="container">
+        <h1>Orario Uscita Lavoro</h1>
+        <p class="subtitle">Calcola quando staccare in base al giorno e alle pause</p>
+
+        <!-- Selettore Giorni -->
+        <div class="days-selector" id="daysSelector">
+            <button class="day-btn" data-day="1">Lun</button>
+            <button class="day-btn" data-day="2">Mar</button>
+            <button class="day-btn" data-day="3">Mer</button>
+            <button class="day-btn" data-day="4">Gio</button>
+            <button class="day-btn" data-day="5">Ven</button>
+        </div>
+
+        <!-- Input Entrata -->
+        <div class="input-group">
+            <label for="startTime">Orario di Entrata</label>
+            <div class="input-row">
+                <input type="time" id="startTime" value="08:30">
+                <button class="btn-now" id="btnNow">Ora attuale</button>
+            </div>
+        </div>
+
+        <!-- Input Pausa Pranzo -->
+        <div class="input-group">
+            <label for="breakTime">Pausa Pranzo (Ore:Minuti)</label>
+            <input type="text" id="breakTime" value="01:10">
+        </div>
+
+        <!-- Risultato -->
+        <div class="result-card">
+            <div class="result-label">Orario in cui puoi uscire</div>
+            <div class="result-time" id="exitTime">--:--</div>
+            
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="countdown-container" id="countdownContainer">
+                Mancano <span class="countdown-time" id="countdownTime">--:--</span> alla fine
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const startTimeInput = document.getElementById('startTime');
+        const breakTimeInput = document.getElementById('breakTime');
+        const exitTimeDisplay = document.getElementById('exitTime');
+        const countdownTimeDisplay = document.getElementById('countdownTime');
+        const progressBar = document.getElementById('progressBar');
+        const btnNow = document.getElementById('btnNow');
+        const dayButtons = document.querySelectorAll('.day-btn');
+
+        function initSelectedDay() {
+            const today = new Date().getDay(); // 0 = Dom, 1 = Lun, ..., 6 = Sab
+            let targetDay = (today >= 1 && today <= 5) ? today : 1;
+            setActiveDay(targetDay);
+        }
+
+        function setActiveDay(dayNum) {
+            dayButtons.forEach(btn => {
+                if (parseInt(btn.dataset.day) === dayNum) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            calculateExitTime();
+        }
+
+        dayButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                setActiveDay(parseInt(btn.dataset.day));
+            });
+        });
+
+        btnNow.addEventListener('click', () => {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            startTimeInput.value = `${hours}:${minutes}`;
+            calculateExitTime();
+        });
+
+        function parseDuration(str) {
+            const parts = str.split(':');
+            if (parts.length !== 2) return 0;
+            const h = parseFloat(parts[0]) || 0;
+            const m = parseFloat(parts[1]) || 0;
+            return h + (m / 60);
+        }
+
+        function calculateExitTime() {
+            const startVal = startTimeInput.value;
+            const breakVal = breakTimeInput.value;
+            
+            const activeBtn = document.querySelector('.day-btn.active');
+            const currentDayNum = activeBtn ? parseInt(activeBtn.dataset.day) : 1;
+
+            const targetHours = (currentDayNum === 5) ? 7.0 : 7.5;
+
+            if (!startVal) return;
+
+            const [startH, startM] = startVal.split(':').map(Number);
+            let startTotalMinutes = (startH * 60) + startM;
+
+            // REGOLA: Se l'orario inserito è prima delle 08:00 (480 minuti), il calcolo parte dalle 08:00
+            const limitMinutes = 8 * 60;
+            const effectiveStartMinutes = Math.max(startTotalMinutes, limitMinutes);
+
+            const breakHoursDecimal = parseDuration(breakVal);
+            const breakTotalMinutes = Math.round(breakHoursDecimal * 60);
+            const targetTotalMinutes = Math.round(targetHours * 60);
+
+            // Calcolo minuto di uscita basato sull'inizio effettivo (minimo 08:00)
+            const exitTotalMinutes = effectiveStartMinutes + breakTotalMinutes + targetTotalMinutes;
+
+            const exitH = Math.floor(exitTotalMinutes / 60) % 24;
+            const exitM = exitTotalMinutes % 60;
+
+            const formattedExitTime = `${String(exitH).padStart(2, '0')}:${String(exitM).padStart(2, '0')}`;
+            exitTimeDisplay.textContent = formattedExitTime;
+
+            updateCountdown(effectiveStartMinutes, exitTotalMinutes);
+        }
+
+        function updateCountdown(startMin, exitMin) {
+            const now = new Date();
+            const currentMin = (now.getHours() * 60) + now.getMinutes() + (now.getSeconds() / 60);
+
+            const totalWorkSpan = exitMin - startMin;
+            let elapsedWorkSpan = currentMin - startMin;
+
+            // Progresso percentuale
+            let progress = (elapsedWorkSpan / totalWorkSpan) * 100;
+            progress = Math.max(0, Math.min(100, progress));
+            progressBar.style.width = `${progress}%`;
+
+            // Countdown rimanente
+            const remainingMin = exitMin - currentMin;
+
+            if (remainingMin > 0) {
+                const remH = Math.floor(remainingMin / 60);
+                const remM = Math.floor(remainingMin % 60);
+                const remS = Math.floor((remainingMin * 60) % 60);
+                
+                if (remH > 0) {
+                    countdownTimeDisplay.textContent = `${remH}h ${remM}m`;
+                } else {
+                    countdownTimeDisplay.textContent = `${remM}m ${remS}s`;
+                }
+                document.getElementById('countdownContainer').style.color = 'var(--text-muted)';
+            } else {
+                const overMin = Math.abs(Math.floor(remainingMin));
+                const overH = Math.floor(overMin / 60);
+                const overM = overMin % 60;
+                countdownTimeDisplay.textContent = `Orario superato di ${overH > 0 ? overH + 'h ' : ''}${overM}m! 🎉`;
+                document.getElementById('countdownContainer').style.color = 'var(--success)';
+            }
+        }
+
+        startTimeInput.addEventListener('input', calculateExitTime);
+        breakTimeInput.addEventListener('input', calculateExitTime);
+
+        // Avvio iniziale
+        initSelectedDay();
+        setInterval(calculateExitTime, 1000);
+    </script>
+</body>
+</html>
