@@ -3,208 +3,451 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work Timer - Calcolo Orario Uscita</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Work Timer Pro - Calcolo Orario Uscita</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
+            --bg-dark: #05070f;
+            --card-bg: rgba(15, 21, 39, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-cyan: #00f2fe;
+            --accent-blue: #4facfe;
+            --accent-purple: #7f00ff;
+            --accent-pink: #ff007f;
+            --accent-green: #00e676;
+            --accent-warning: #ff9f43;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --border: #334155;
-            --success: #10b981;
-            --warning: #f59e0b;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-dark);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Sfere luminose fluttuanti di sfondo */
+        .ambient-light {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.55;
+            z-index: 0;
+            pointer-events: none;
+            animation: floatGlow 14s infinite alternate ease-in-out;
+        }
+
+        .light-1 {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, var(--accent-purple), transparent);
+            top: -100px;
+            left: -100px;
+        }
+
+        .light-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--accent-cyan), transparent);
+            bottom: -150px;
+            right: -100px;
+            animation-delay: -7s;
+        }
+
+        .light-3 {
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, var(--accent-pink), transparent);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.35;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(50px, 35px) scale(1.12) rotate(180deg); }
+            100% { transform: translate(-30px, 60px) scale(0.9) rotate(360deg); }
         }
 
         .container {
+            position: relative;
+            z-index: 1;
             width: 100%;
-            max-width: 480px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            max-width: 460px;
+            background: var(--card-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            padding: 36px 30px;
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.7),
+                0 0 45px rgba(0, 242, 254, 0.12),
+                inset 0 1px 1px rgba(255, 255, 255, 0.2);
         }
 
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 8px;
+        .container::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 33px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.02), rgba(0,242,254,0.4));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .header {
             text-align: center;
+            margin-bottom: 26px;
+        }
+
+        .header-logo-container {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 14px 22px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 25px rgba(0, 242, 254, 0.25);
+            animation: floatIcon 4s ease-in-out infinite;
+        }
+
+        .header-logo {
+            max-width: 210px;
+            height: auto;
+            display: block;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
         }
 
         .subtitle {
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            text-align: center;
-            margin-bottom: 24px;
+            font-weight: 400;
         }
 
+        .target-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            border-radius: 20px;
+            font-size: 0.78rem;
+            color: var(--accent-cyan);
+            margin-top: 10px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.1);
+        }
+
+        /* Selettore Giorni */
         .days-selector {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 24px;
         }
 
         .day-btn {
-            background-color: var(--bg-color);
-            border: 1px solid var(--border);
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
             color: var(--text-muted);
-            padding: 10px 0;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 500;
+            padding: 12px 0;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
+            overflow: hidden;
         }
 
         .day-btn:hover {
-            border-color: var(--accent);
+            border-color: rgba(0, 242, 254, 0.4);
             color: var(--text-main);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .day-btn.active {
-            background-color: var(--accent);
-            border-color: var(--accent);
-            color: white;
-            font-weight: 600;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            border-color: #00f2fe;
+            color: #05070f;
+            font-weight: 800;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.6), 0 0 35px rgba(79, 172, 254, 0.4);
+            animation: pulseActiveDay 2s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseActiveDay {
+            0% { box-shadow: 0 0 15px rgba(0, 242, 254, 0.5), 0 0 25px rgba(0, 242, 254, 0.3); }
+            100% { box-shadow: 0 0 28px rgba(0, 242, 254, 0.95), 0 0 50px rgba(0, 242, 254, 0.6); }
         }
 
         .input-group {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
             color: var(--text-muted);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        label i {
+            color: var(--accent-cyan);
         }
 
         .input-row {
             display: flex;
-            gap: 8px;
+            gap: 10px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            width: 100%;
         }
 
         input {
             width: 100%;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
+            background: rgba(8, 12, 24, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px 16px;
             color: var(--text-main);
             font-size: 1rem;
+            font-weight: 600;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         input:focus {
-            border-color: var(--accent);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        input.readonly-input {
+            background: rgba(5, 8, 16, 0.5);
+            color: var(--text-muted);
+            border-style: dashed;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
         .btn-now {
-            background-color: var(--bg-color);
-            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 0 16px;
-            border-radius: 8px;
+            padding: 0 18px;
+            border-radius: 14px;
             font-size: 0.85rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
-            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
         }
 
         .btn-now:hover {
-            background-color: var(--border);
+            background: rgba(0, 242, 254, 0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 18px rgba(0, 242, 254, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* CARD RISULTATO */
+        .result-card-wrapper {
+            margin-top: 28px;
         }
 
         .result-card {
-            margin-top: 24px;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
+            position: relative;
+            background: linear-gradient(160deg, rgba(22, 30, 58, 0.85), rgba(8, 12, 24, 0.95));
+            border: 1px solid rgba(0, 242, 254, 0.35);
+            border-radius: 22px;
+            padding: 26px 20px;
             text-align: center;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.6),
+                0 0 30px rgba(0, 242, 254, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            overflow: hidden;
         }
 
         .result-label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.14em;
             color: var(--text-muted);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            font-weight: 800;
         }
 
         .result-time {
-            font-size: 2.25rem;
-            font-weight: 700;
-            color: var(--success);
-            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.4rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            line-height: 1;
+            margin: 10px 0 16px 0;
+            background: linear-gradient(180deg, #ffffff 20%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.6));
+            animation: standardPulse 2s infinite alternate ease-in-out;
         }
 
-        .countdown-container {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            border-top: 1px solid var(--border);
-            padding-top: 12px;
-            margin-top: 12px;
+        @keyframes standardPulse {
+            0% { filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.4)); transform: scale(1); }
+            100% { filter: drop-shadow(0 0 25px rgba(0, 242, 254, 0.9)); transform: scale(1.03); }
         }
 
-        .countdown-time {
-            font-weight: 600;
-            color: var(--text-main);
+        .result-time.urgent {
+            background: linear-gradient(180deg, #ffffff 20%, var(--accent-warning) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fastPulseUrgent 0.6s infinite alternate ease-in-out;
+        }
+
+        @keyframes fastPulseUrgent {
+            0% { filter: drop-shadow(0 0 10px rgba(255, 159, 67, 0.5)); transform: scale(1); }
+            100% { filter: drop-shadow(0 0 35px rgba(255, 159, 67, 1)); transform: scale(1.06); }
+        }
+
+        .result-time.completed {
+            background: linear-gradient(180deg, #ffffff 20%, var(--accent-green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fastPulseGreen 0.8s infinite alternate ease-in-out;
+        }
+
+        @keyframes fastPulseGreen {
+            0% { filter: drop-shadow(0 0 12px rgba(0, 230, 118, 0.6)); transform: scale(1); }
+            100% { filter: drop-shadow(0 0 40px rgba(0, 230, 118, 1)); transform: scale(1.07); }
         }
 
         .progress-bar-container {
+            position: relative;
             width: 100%;
-            background-color: var(--border);
-            height: 6px;
-            border-radius: 3px;
-            margin-top: 16px;
+            background-color: rgba(255, 255, 255, 0.06);
+            height: 9px;
+            border-radius: 10px;
+            margin: 20px 0 16px 0;
             overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
         }
 
         .progress-bar {
             height: 100%;
-            background-color: var(--accent);
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
             width: 0%;
-            transition: width 0.5s ease;
+            border-radius: 10px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px var(--accent-cyan);
+            position: relative;
+        }
+
+        .progress-bar.urgent-bar {
+            background: linear-gradient(90deg, var(--accent-warning), var(--accent-pink));
+            box-shadow: 0 0 20px var(--accent-warning);
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 12px;
+            background: #fff;
+            box-shadow: 0 0 12px #fff, 0 0 22px var(--accent-cyan);
+            border-radius: 50%;
+        }
+
+        .countdown-container {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .countdown-time {
+            font-weight: 700;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.98rem;
+        }
+
+        .note-limit {
+            font-size: 0.72rem;
+            color: var(--accent-warning);
+            margin-top: 6px;
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .note-limit.show {
+            display: flex;
         }
     </style>
 </head>
-<!-- Configurazioni specifiche per iOS (Web App) -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Work Timer">
-    <link rel="apple-touch-icon" href="icon.png">
 <body>
 
+    <!-- Effetti Luce Ambientale -->
+    <div class="ambient-light light-1"></div>
+    <div class="ambient-light light-2"></div>
+    <div class="ambient-light light-3"></div>
+
     <div class="container">
-        <h1>Orario Uscita Lavoro</h1>
-        <p class="subtitle">Calcola quando staccare in base al giorno e alle pause</p>
+        <div class="header">
+            <!-- Logo collegato tramite URL Raw dal tuo repository GitHub -->
+            <div class="header-logo-container">
+                <img src="https://raw.githubusercontent.com/HIJACKER1981/A-CHE-ORA-ESCO/main/BP.jpg" alt="Banca Progetto" class="header-logo">
+            </div>
+            <p class="subtitle">Calcola quando staccare in base al giorno e alle pause</p>
+            <div class="target-badge" id="targetBadge">
+                <i class="fa-regular fa-clock"></i> <span id="targetHoursText">7.5 Ore lavorative</span>
+            </div>
+        </div>
 
         <!-- Selettore Giorni -->
         <div class="days-selector" id="daysSelector">
@@ -217,30 +460,41 @@
 
         <!-- Input Entrata -->
         <div class="input-group">
-            <label for="startTime">Orario di Entrata</label>
+            <label for="startTime"><i class="fa-solid fa-right-to-bracket"></i> Orario di Entrata</label>
             <div class="input-row">
-                <input type="time" id="startTime" value="08:30">
-                <button class="btn-now" id="btnNow">Ora attuale</button>
+                <div class="input-wrapper">
+                    <input type="time" id="startTime" value="08:30">
+                </div>
+                <button class="btn-now" id="btnNow">
+                    <i class="fa-solid fa-location-crosshairs"></i> Ora
+                </button>
+            </div>
+            <div class="note-limit" id="noteLimit">
+                <i class="fa-solid fa-circle-info"></i> L'orario prima delle 08:00 viene conteggiato dalle 08:00.
             </div>
         </div>
 
-        <!-- Input Pausa Pranzo -->
+        <!-- Input Pausa Pranzo (Fissa / Readonly) -->
         <div class="input-group">
-            <label for="breakTime">Pausa Pranzo (Ore:Minuti)</label>
-            <input type="text" id="breakTime" value="01:10">
+            <label for="breakTime"><i class="fa-solid fa-utensils"></i> Pausa Pranzo (Fissa)</label>
+            <div class="input-wrapper">
+                <input type="text" id="breakTime" value="01:10" readonly class="readonly-input">
+            </div>
         </div>
 
         <!-- Risultato -->
-        <div class="result-card">
-            <div class="result-label">Orario in cui puoi uscire</div>
-            <div class="result-time" id="exitTime">--:--</div>
-            
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
+        <div class="result-card-wrapper">
+            <div class="result-card">
+                <div class="result-label">Orario in cui puoi uscire</div>
+                <div class="result-time" id="exitTime">--:--</div>
+                
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
 
-            <div class="countdown-container" id="countdownContainer">
-                Mancano <span class="countdown-time" id="countdownTime">--:--</span> alla fine
+                <div class="countdown-container" id="countdownContainer">
+                    <i class="fa-regular fa-hourglass-half"></i> Mancano <span class="countdown-time" id="countdownTime">--:--</span> alla fine
+                </div>
             </div>
         </div>
     </div>
@@ -253,9 +507,11 @@
         const progressBar = document.getElementById('progressBar');
         const btnNow = document.getElementById('btnNow');
         const dayButtons = document.querySelectorAll('.day-btn');
+        const targetHoursText = document.getElementById('targetHoursText');
+        const noteLimit = document.getElementById('noteLimit');
 
         function initSelectedDay() {
-            const today = new Date().getDay(); // 0 = Dom, 1 = Lun, ..., 6 = Sab
+            const today = new Date().getDay();
             let targetDay = (today >= 1 && today <= 5) ? today : 1;
             setActiveDay(targetDay);
         }
@@ -268,6 +524,13 @@
                     btn.classList.remove('active');
                 }
             });
+
+            if (dayNum === 5) {
+                targetHoursText.textContent = "7.0 Ore lavorative (Venerdì)";
+            } else {
+                targetHoursText.textContent = "7.5 Ore lavorative";
+            }
+
             calculateExitTime();
         }
 
@@ -299,7 +562,6 @@
             
             const activeBtn = document.querySelector('.day-btn.active');
             const currentDayNum = activeBtn ? parseInt(activeBtn.dataset.day) : 1;
-
             const targetHours = (currentDayNum === 5) ? 7.0 : 7.5;
 
             if (!startVal) return;
@@ -307,15 +569,18 @@
             const [startH, startM] = startVal.split(':').map(Number);
             let startTotalMinutes = (startH * 60) + startM;
 
-            // REGOLA: Se l'orario inserito è prima delle 08:00 (480 minuti), il calcolo parte dalle 08:00
             const limitMinutes = 8 * 60;
-            const effectiveStartMinutes = Math.max(startTotalMinutes, limitMinutes);
+            if (startTotalMinutes < limitMinutes) {
+                noteLimit.classList.add('show');
+            } else {
+                noteLimit.classList.remove('show');
+            }
 
+            const effectiveStartMinutes = Math.max(startTotalMinutes, limitMinutes);
             const breakHoursDecimal = parseDuration(breakVal);
             const breakTotalMinutes = Math.round(breakHoursDecimal * 60);
             const targetTotalMinutes = Math.round(targetHours * 60);
 
-            // Calcolo minuto di uscita basato sull'inizio effettivo (minimo 08:00)
             const exitTotalMinutes = effectiveStartMinutes + breakTotalMinutes + targetTotalMinutes;
 
             const exitH = Math.floor(exitTotalMinutes / 60) % 24;
@@ -334,12 +599,10 @@
             const totalWorkSpan = exitMin - startMin;
             let elapsedWorkSpan = currentMin - startMin;
 
-            // Progresso percentuale
             let progress = (elapsedWorkSpan / totalWorkSpan) * 100;
             progress = Math.max(0, Math.min(100, progress));
             progressBar.style.width = `${progress}%`;
 
-            // Countdown rimanente
             const remainingMin = exitMin - currentMin;
 
             if (remainingMin > 0) {
@@ -348,24 +611,34 @@
                 const remS = Math.floor((remainingMin * 60) % 60);
                 
                 if (remH > 0) {
-                    countdownTimeDisplay.textContent = `${remH}h ${remM}m`;
+                    countdownTimeDisplay.textContent = `${remH}h ${remM}m ${remS}s`;
                 } else {
                     countdownTimeDisplay.textContent = `${remM}m ${remS}s`;
                 }
                 document.getElementById('countdownContainer').style.color = 'var(--text-muted)';
+                
+                if (remainingMin <= 15) {
+                    exitTimeDisplay.classList.add('urgent');
+                    exitTimeDisplay.classList.remove('completed');
+                    progressBar.classList.add('urgent-bar');
+                } else {
+                    exitTimeDisplay.classList.remove('urgent', 'completed');
+                    progressBar.classList.remove('urgent-bar');
+                }
             } else {
                 const overMin = Math.abs(Math.floor(remainingMin));
                 const overH = Math.floor(overMin / 60);
                 const overM = overMin % 60;
-                countdownTimeDisplay.textContent = `Orario superato di ${overH > 0 ? overH + 'h ' : ''}${overM}m! 🎉`;
-                document.getElementById('countdownContainer').style.color = 'var(--success)';
+                countdownTimeDisplay.innerHTML = `Orario superato di <strong>${overH > 0 ? overH + 'h ' : ''}${overM}m</strong>! 🎉`;
+                document.getElementById('countdownContainer').style.color = 'var(--accent-green)';
+                exitTimeDisplay.classList.remove('urgent');
+                exitTimeDisplay.classList.add('completed');
+                progressBar.classList.remove('urgent-bar');
             }
         }
 
         startTimeInput.addEventListener('input', calculateExitTime);
-        breakTimeInput.addEventListener('input', calculateExitTime);
 
-        // Avvio iniziale
         initSelectedDay();
         setInterval(calculateExitTime, 1000);
     </script>
